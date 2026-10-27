@@ -4,66 +4,87 @@ import Link from "next/link";
 import { User } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 const Links = [
   { name: "Home", href: "/" },
-  { name: "Destination", href: "/destination" },
+  { name: "Destination", href: "/all-destinations" },{ name: "Add Destination", href: "/add-destination" },
   { name: "My Bookings", href: "/my-bookings" },
   { name: "Admin", href: "/admin" },
 ];
 
-export function Navbar() {
-  const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
+interface NavbarProps {
+  /** overlay: transparent bar for hero pages. solid: white bar for content pages. Omit to auto-select by route. */
+  variant?: "overlay" | "solid";
+}
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+const subscribe = () => () => {};
 
-  const currentPath = mounted ? pathname : "/";
+export function Navbar({ variant }: NavbarProps = {}) {
+  const routerPathname = usePathname();
+  // After hydration, prefer the real URL so the active link matches even
+  // when a route renders at another path (server snapshot avoids mismatch).
+  const clientPathname = useSyncExternalStore(
+    subscribe,
+    () => window.location.pathname,
+    () => routerPathname
+  );
+  // Home has a full-bleed hero banner; every other route sits on white.
+  const solid = variant ? variant === "solid" : clientPathname !== "/";
+
+  const currentPath = clientPathname;
+
+  const linkClass = (href: string) =>
+    cn(
+      "relative pb-1 text-sm font-medium transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:transition-transform after:duration-200",
+      solid
+        ? cn(
+            "after:bg-sky-600",
+            currentPath === href
+              ? "text-sky-600 after:scale-x-100"
+              : "text-black/80 hover:text-black after:scale-x-0"
+          )
+        : cn(
+            "after:bg-white",
+            currentPath === href
+              ? "text-white after:scale-x-100"
+              : "text-white/90 hover:text-white after:scale-x-0"
+          )
+    );
 
   return (
-    <header className="absolute left-0 top-0 z-50 w-full">
+    <header
+      className={cn(
+        "left-0 top-0 z-50 w-full",
+        solid
+          ? "sticky border-b border-gray-200 bg-white"
+          : "absolute"
+      )}
+    >
       <nav className="container mx-auto flex items-center justify-between px-6 py-5">
-        <Link href="/" className="text-2xl font-bold tracking-tight text-white">
+        <Link
+          href="/"
+          className={cn(
+            "text-2xl font-bold tracking-tight",
+            solid ? "text-sky-600" : "text-white"
+          )}
+        >
           Wanderlust
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
           {Links.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className={cn(
-                "relative pb-1 text-sm font-medium transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:bg-white after:transition-transform after:duration-200",
-                currentPath === link.href
-                  ? "text-white after:scale-x-100"
-                  : "text-white/90 hover:text-white after:scale-x-0"
-              )}
-            >
+            <Link key={link.name} href={link.href} className={linkClass(link.href)}>
               {link.name}
             </Link>
           ))}
         </div>
 
         <div className="flex items-center gap-4">
-          <Link
-            href="/signin"
-            className={cn(
-              "relative pb-1 text-sm font-medium transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:bg-white after:transition-transform after:duration-200",
-              currentPath === "/signin" ? "text-white after:scale-x-100" : "text-white/90 hover:text-white after:scale-x-0"
-            )}
-          >
+          <Link href="/signin" className={linkClass("/signin")}>
             Sign In
           </Link>
-          <Link
-            href="/signup"
-            className={cn(
-              "relative pb-1 text-sm font-medium transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:bg-white after:transition-transform after:duration-200",
-              currentPath === "/signup" ? "text-white after:scale-x-100" : "text-white/90 hover:text-white after:scale-x-0"
-            )}
-          >
+          <Link href="/signup" className={linkClass("/signup")}>
             Sign Up
           </Link>
           <Link
@@ -71,8 +92,12 @@ export function Navbar() {
             className={cn(
               "flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
               currentPath === "/profile"
-                ? "bg-white text-black"
-                : "bg-white/10 text-white hover:bg-white/20"
+                ? solid
+                  ? "bg-sky-600 text-white"
+                  : "bg-white text-black"
+                : solid
+                  ? "bg-sky-50 text-sky-600 hover:bg-sky-100"
+                  : "bg-white/10 text-white hover:bg-white/20"
             )}
           >
             <User className="h-4 w-4" />

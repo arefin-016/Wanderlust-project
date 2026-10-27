@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Users, Search } from "lucide-react";
 
 export function Banner() {
   return (
@@ -34,36 +33,6 @@ export function Banner() {
           >
             View Popular Tours
           </Button>
-        </div>
-
-        <div className="mt-12 w-full max-w-5xl rounded-2xl bg-white/95 p-4 shadow-xl backdrop-blur-sm md:p-6">
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="flex items-center gap-3 rounded-xl px-4 py-3">
-              <MapPin className="h-5 w-5 text-muted-foreground" />
-              <div className="text-left">
-                <p className="text-sm font-medium">Destination</p>
-                <p className="text-sm text-muted-foreground">Where to go?</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl px-4 py-3">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <div className="text-left">
-                <p className="text-sm font-medium">Date</p>
-                <p className="text-sm text-muted-foreground">Add dates</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl px-4 py-3">
-              <Users className="h-5 w-5 text-muted-foreground" />
-              <div className="text-left">
-                <p className="text-sm font-medium">Travelers</p>
-                <p className="text-sm text-muted-foreground">Add guests</p>
-              </div>
-            </div>
-            <Button size="lg" className="h-full w-full gap-2">
-              <Search className="h-4 w-4" />
-              Search
-            </Button>
-          </div>
         </div>
       </div>
     </section>

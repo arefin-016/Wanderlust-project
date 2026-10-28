@@ -111,9 +111,10 @@ export default function AllDestinationsPage() {
         {!isLoading && !hasError && visible.length > 0 && (
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {visible.map((item) => (
-              <div
+              <Link
                 key={item._id}
-                className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                href={`/all-destinations/${item._id}`}
+                className="group block overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:border-sky-500 hover:shadow-md"
               >
                 <div className="relative h-48">
                   <img
@@ -151,15 +152,12 @@ export default function AllDestinationsPage() {
                     {formatDuration(item.duration)}
                   </p>
 
-                  <Link
-                    href={`/all-destinations/${item._id}`}
-                    className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-sky-600 transition-colors hover:text-sky-700"
-                  >
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-sky-600 transition-colors group-hover:text-sky-700">
                     Book Now
                     <ArrowUpRight className="h-4 w-4" />
-                  </Link>
+                  </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

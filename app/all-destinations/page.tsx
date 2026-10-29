@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, CalendarDays, ArrowUpRight, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 
@@ -117,10 +118,12 @@ export default function AllDestinationsPage() {
                 className="group block overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:border-sky-500 hover:shadow-md"
               >
                 <div className="relative h-48">
-                  <img
+                  <Image
                     src={item.imageUrl || FALLBACK_IMAGE}
                     alt={item.destinationName}
-                    className="absolute inset-0 h-full w-full object-cover"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover"
                   />
                   <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-black shadow-sm">
                     {item.category}

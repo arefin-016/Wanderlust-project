@@ -1,12 +1,16 @@
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 export function Banner() {
   return (
     <section className="relative h-[90vh] min-h-[650px] w-full">
-      <img
+      <Image
         src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2560&q=80"
         alt="Tropical beach with turquoise water and palm trees"
-        className="absolute inset-0 h-full w-full object-cover"
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
 

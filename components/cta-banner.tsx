@@ -1,13 +1,16 @@
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 export function CtaBanner() {
   return (
     <section className="relative overflow-hidden py-28">
-      <img
+      <Image
         src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=2560&q=80"
         alt="Airplane flying over turquoise ocean"
-        className="absolute inset-0 h-full w-full object-cover"
+        fill
+        sizes="100vw"
+        className="object-cover"
       />
       <div className="absolute inset-0 bg-black/60" />
 

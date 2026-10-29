@@ -84,7 +84,7 @@ export function Navbar({ variant }: NavbarProps = {}) {
           <Link href="/signin" className={linkClass("/signin")}>
             Sign In
           </Link>
-          <Link href="/signup" className={linkClass("/signup")}>
+          <Link href="/signUp" className={linkClass("/signup")}>
             Sign Up
           </Link>
           <Link

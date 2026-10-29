@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import {
@@ -12,7 +13,6 @@ import {
   Loader2,
   MapPin,
   Star,
-  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
@@ -177,10 +177,13 @@ export default function DestinationDetailsPage({
           <>
             {/* Hero image */}
             <div className="relative mt-6 h-[280px] overflow-hidden rounded-xl md:h-[440px]">
-              <img
+              <Image
                 src={item.imageUrl || FALLBACK_IMAGE}
                 alt={item.destinationName}
-                className="absolute inset-0 h-full w-full object-cover"
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover"
               />
             </div>
 

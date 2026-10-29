@@ -13,29 +13,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Save, Trash2, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 import { DialogClose, DialogFooter } from "./ui/dialog";
 
 const categories = ["Beach", "Mountain", "City", "Safari", "Cultural", "Adventure"];
 
-const initialForm = {
-  destinationName: "",
-  country: "",
-  category: "",
-  price: "",
-  duration: "",
-  departureDate: "",
-  imageUrl: "",
-  description: "",
-};
+export interface Destination {
+  _id: string;
+  destinationName: string;
+  country: string;
+  category: string;
+  price: string;
+  duration: string;
+  departureDate: string;
+  imageUrl: string;
+  description: string;
+}
 
-export default function EditForm() {
-  const [form, setForm] = useState(initialForm);
+interface EditFormProps {
+  item: Destination;
+  onSaved?: (updated: Destination) => void;
+}
+
+export default function EditForm({ item, onSaved }: EditFormProps) {
+  const [form, setForm] = useState(item);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const update = (field: keyof typeof form, value: string) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev: typeof form) => ({ ...prev, [field]: value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,29 +49,29 @@ export default function EditForm() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch(`http://localhost:8000/add-destination`, {
-        method: "POST",
+      const { _id, ...payload } = form;
+      const res = await fetch(`http://localhost:8000/all-destinations/${_id}`, {
+        method: "PATCH",
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         let serverMessage = "";
         try {
-          const body = (await res.json()) as { message?: string };
-          serverMessage = body?.message ?? "";
+          const body = await res.json();
+          serverMessage = typeof body?.message === "string" ? body.message : "";
         } catch {
-          // Non-JSON error body — fall through to status-based handling.
+          // ignore non-JSON error bodies
         }
 
         if (res.status === 409) {
           toast.add({
             type: "error",
             title: "Place already added",
-            description:
-              serverMessage || "This place has already been added.",
+            description: serverMessage || "the place is added already",
             priority: "high",
           });
           return;
@@ -74,25 +80,21 @@ export default function EditForm() {
         throw new Error(serverMessage || `Server responded with ${res.status}`);
       }
 
-      let data: unknown = null;
-      try {
-        data = await res.json();
-      } catch {
-        // Non-JSON response is fine — the request itself succeeded.
-      }
-      console.log(data);
+      const body = await res.json();
+      const updated: Destination = body?.destination ?? { ...form };
 
       toast.add({
         type: "success",
-        title: "Travel package added",
-        description: `${form.destinationName || "Your package"} was created successfully.`,
+        title: "Destination updated",
+        description: `${updated.destinationName} has been updated successfully.`,
       });
-      setForm(initialForm);
+
+      setForm(updated);
+      onSaved?.(updated);
     } catch (err) {
-      console.error(err);
       toast.add({
         type: "error",
-        title: "Failed to add travel package",
+        title: "Failed to update",
         description:
           err instanceof Error
             ? err.message
@@ -104,131 +106,118 @@ export default function EditForm() {
     }
   };
 
-  const handleCancel = () => setForm(initialForm);
-
   return (
-    <div className="flex min-h-150 flex-col bg-white">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="destinationName">Destination Name</Label>
+        <Input
+          id="destinationName"
+          value={form.destinationName}
+          onChange={(e) => update("destinationName", e.target.value)}
+          placeholder="e.g. Bali, Indonesia"
+        />
+      </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="country">Country</Label>
+        <Input
+          id="country"
+          value={form.country}
+          onChange={(e) => update("country", e.target.value)}
+          placeholder="e.g. Indonesia"
+        />
+      </div>
 
-      <main className="flex-1">
-        <div className="container mx-auto px-6 py-12 md:py-16">
-          <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
-            Update Travel Package
-          </h1>
-		  <p className="text-gray-400 mt-2">Make changes to the travel package details below</p>
-
-          <form
-            onSubmit={handleSubmit}
-            className="mx-auto mt-10 w-full max-w-2xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm md:p-8"
-          >
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="destinationName">Destination Name</Label>
-                <Input
-                  id="destinationName"
-                  placeholder="Bali Paradise"
-                  value={form.destinationName}
-                  onChange={(e) => update("destinationName", e.target.value)}
-                />
-              </div>
-
-              <div className="grid gap-5 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    placeholder="Indonesia"
-                    value={form.country}
-                    onChange={(e) => update("country", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Category</Label>
-                  <Select
-                    value={form.category}
-                    onValueChange={(value) => update("category", value ?? "")}
-                  >
-                    <SelectTrigger className="h-9 w-full">
-                      <SelectValue placeholder="Beach" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid gap-5 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price (USD)</Label>
-                  <Input
-                    id="price"
-                    placeholder="e.g., 1299"
-                    value={form.price}
-                    onChange={(e) => update("price", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Duration</Label>
-                  <Input
-                    id="duration"
-                    placeholder="e.g., 7 Days/6 Nights"
-                    value={form.duration}
-                    onChange={(e) => update("duration", e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="departureDate">Departure Date</Label>
-                <Input
-                  id="departureDate"
-                  type="date"
-                  placeholder="mm/dd/yyyy"
-                  value={form.departureDate}
-                  onChange={(e) => update("departureDate", e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="imageUrl">Image URL</Label>
-                <Input
-                  id="imageUrl"
-                  placeholder="https://example.com/image.jpg"
-                  value={form.imageUrl}
-                  onChange={(e) => update("imageUrl", e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Describe the travel experience..."
-                  rows={5}
-                  className="resize-none"
-                  value={form.description}
-                  onChange={(e) => update("description", e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="mt-8 flex items-center justify-end gap-3">
-
-<DialogFooter>
-            <DialogClose render={<Button variant="outline">Cancel</Button>} />
-            <Button type="submit">Save changes</Button>
-          </DialogFooter>
-            </div>
-          </form>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="category">Category</Label>
+          <Select value={form.category} onValueChange={(value) => update("category", value ?? "")}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </main>
 
+        <div className="space-y-2">
+          <Label htmlFor="price">Price per person ($)</Label>
+          <Input
+            id="price"
+            type="number"
+            min="0"
+            value={form.price}
+            onChange={(e) => update("price", e.target.value)}
+            placeholder="e.g. 1200"
+          />
+        </div>
+      </div>
 
-    </div>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="duration">Duration (days)</Label>
+          <Input
+            id="duration"
+            type="number"
+            min="1"
+            value={form.duration}
+            onChange={(e) => update("duration", e.target.value)}
+            placeholder="e.g. 7"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="departureDate">Departure Date</Label>
+          <Input
+            id="departureDate"
+            type="date"
+            value={form.departureDate}
+            onChange={(e) => update("departureDate", e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="imageUrl">Image</Label>
+        <Input
+          id="imageUrl"
+          value={form.imageUrl}
+          onChange={(e) => update("imageUrl", e.target.value)}
+          placeholder="Paste an image URL"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          rows={4}
+          value={form.description}
+          onChange={(e) => update("description", e.target.value)}
+          placeholder="Describe this destination..."
+        />
+      </div>
+
+      <DialogFooter>
+        <DialogClose
+          render={<Button type="button" variant="outline" disabled={isSubmitting}>
+            Cancel
+          </Button>}
+        />
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="gap-2 bg-sky-600 text-white hover:bg-sky-700"
+        >
+          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          {isSubmitting ? "Saving..." : "Save Changes"}
+        </Button>
+      </DialogFooter>
+    </form>
   );
 }

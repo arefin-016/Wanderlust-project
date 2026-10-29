@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import {
   ArrowLeft,
   ArrowRight,
@@ -10,7 +11,6 @@ import {
   Check,
   Loader2,
   MapPin,
-  SquarePen,
   Star,
   Trash2,
 } from "lucide-react";
@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 
 import EditDestinationsPage from './../../../components/EditDestinationsPage';
+import DeleteDestinationDialog from "@/components/DeleteDestinationDialog";
 
 interface Destination {
   _id: string;
@@ -137,15 +138,10 @@ export default function DestinationDetailsPage({
           </Link>
 
           <div className="flex items-center gap-3">
-            <EditDestinationsPage></EditDestinationsPage>
-            <Button
-              variant="outline"
-              className="gap-2 border-red-200 text-red-500 hover:border-red-300 hover:bg-red-50 hover:text-red-600"
-              onClick={() => router.push("/all-destinations")}
-            >
-              <Trash2 className="h-4 w-4" />
-              Cancel
-            </Button>
+            {item && (
+              <EditDestinationsPage item={item} onSaved={setItem}></EditDestinationsPage>
+            )}
+            <DeleteDestinationDialog></DeleteDestinationDialog>
           </div>
         </div>
 

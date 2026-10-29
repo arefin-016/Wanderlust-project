@@ -141,7 +141,9 @@ export default function DestinationDetailsPage({
             {item && (
               <EditDestinationsPage item={item} onSaved={setItem}></EditDestinationsPage>
             )}
-            <DeleteDestinationDialog></DeleteDestinationDialog>
+            {item && (
+              <DeleteDestinationDialog item={item} id={id}></DeleteDestinationDialog>
+            )}
           </div>
         </div>
 

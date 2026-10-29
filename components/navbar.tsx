@@ -1,10 +1,23 @@
 "use client";
+import { FaSignOutAlt } from "react-icons/fa";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { authClient } from "@/lib/auth-client"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import Link from "next/link";
-import { User } from "lucide-react";
+import { Divide, User } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSyncExternalStore } from "react";
+import { Button } from "./ui/button";
+
 
 const Links = [
   { name: "Home", href: "/" },
@@ -51,7 +64,17 @@ export function Navbar({ variant }: NavbarProps = {}) {
               : "text-white/90 hover:text-white after:scale-x-0"
           )
     );
-
+	const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } =authClient.useSession()
+	const user=session?.user
+console.log(user)
+const handleSignOut=()=>{
+	authClient.signOut()
+}
   return (
     <header
       className={cn(
@@ -80,13 +103,34 @@ export function Navbar({ variant }: NavbarProps = {}) {
           ))}
         </div>
 
-        <div className="flex items-center gap-4">
-          <Link href="/signin" className={linkClass("/signin")}>
+
+<div className="flex items-center gap-4">
+
+{user?<Popover>
+  <PopoverTrigger render={<Button variant="outline" />}>
+   <Avatar>
+  <AvatarImage src={user?.image as string} />
+  <AvatarFallback>{user?.name.charAt(0)}</AvatarFallback>
+</Avatar>
+
+  </PopoverTrigger>
+  <PopoverContent>
+    <PopoverHeader>
+      <PopoverTitle>{user?.name}</PopoverTitle>
+      <PopoverDescription>{user?.email}</PopoverDescription>
+	  <Button onClick={handleSignOut} className={'mt-3'}><FaSignOutAlt /> Sign Out</Button>
+    </PopoverHeader>
+  </PopoverContent>
+</Popover> :<div className="flex items-center gap-4"><Link href="/signIn" className={linkClass("/signin")}>
             Sign In
           </Link>
           <Link href="/signUp" className={linkClass("/signup")}>
             Sign Up
-          </Link>
+          </Link></div>}
+
+
+
+
           <Link
             href="/profile"
             className={cn(

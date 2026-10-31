@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '../ui/button';
 import { toast } from '../ui/toast';
 import { Iitem } from '@/types/item';
+import { authClient } from '@/lib/auth-client';
 
 const BookingsCard = ({item}:{item:Iitem}) => {
 	const perks = [
@@ -10,7 +11,9 @@ const BookingsCard = ({item}:{item:Iitem}) => {
   "Travel insurance included",
   "24/7 customer support",
 ];
-	const handleBookNow = () => {
+const {data: session,} =authClient.useSession()
+	const user=session?.user
+	const handleBookNow =async () => {
     if (!item) return;
     const dateInput = document.getElementById(
       "booking-date"
@@ -22,6 +25,22 @@ const BookingsCard = ({item}:{item:Iitem}) => {
         dateInput?.value || item.departureDate || "your selected date"
       }.`,
     });
+	const bookingData={
+		name:user?.name,
+		email:user?.email,
+		...item,
+		departureData:dateInput?.value,
+		bookingDate:new Date()
+	}
+const res=await fetch(`http://localhost:8000/booking`,{
+	method:"POST",
+	headers:{
+		'Content-Type':"application/json"
+	},
+	body:JSON.stringify(bookingData)
+})
+const data=await res.json()
+console.log(data)
   };
 	return (
 		 <aside className="lg:sticky lg:top-24 lg:self-start">
@@ -31,8 +50,9 @@ const BookingsCard = ({item}:{item:Iitem}) => {
                     ${item.price}
                   </p>
                   <p className="text-xs text-muted-foreground">per person</p>
-
+				  <form action="">
                   <input
+				  name='departureDate'
                     id="booking-date"
                     type="date"
                     defaultValue={item.departureDate}
@@ -46,6 +66,8 @@ const BookingsCard = ({item}:{item:Iitem}) => {
                     Book Now
                     <ArrowRight className="h-4 w-4" />
                   </Button>
+				  </form>
+
 
                   <div className="mt-5 space-y-3 border-t border-gray-100 pt-4">
                     {perks.map((perk) => (

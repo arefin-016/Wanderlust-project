@@ -23,7 +23,7 @@ const Links = [
   { name: "Home", href: "/" },
   { name: "Destination", href: "/all-destinations" },{ name: "Add Destination", href: "/add-destination" },
   { name: "My Bookings", href: "/my-bookings" },
-  { name: "Admin", href: "/admin" },
+ 
 ];
 
 interface NavbarProps {
@@ -64,12 +64,7 @@ export function Navbar({ variant }: NavbarProps = {}) {
               : "text-white/90 hover:text-white after:scale-x-0"
           )
     );
-	const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } =authClient.useSession()
+	const {data: session,} =authClient.useSession()
 	const user=session?.user
 console.log(user)
 const handleSignOut=()=>{
